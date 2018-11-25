@@ -45,23 +45,31 @@ class BaseRecorder:
             raise ValueError(
                 'df is not a pandas.DataFrame instance: {}.'.format(df))
 
-        pickle_path = self.cassette_library_dir / "{}.pickle".format(self.bucket_name)
+        pickle_path = self.cassette_library_dir / "{}.pickle".format(
+            self.bucket_name)
 
         def dump(df):
-            df.to_pickle(pickle_path)
+            if not pickle_path.parent.exists():
+                pickle_path.parent.mkdir(parents=True)
+            df.to_pickle(pickle_path.absolute().as_posix())
 
         def compare(df):
             df_original = pd.read_pickle(pickle_path)
             pd.testing.assert_frame_equal(df, df_original)
 
         if self.record_mode == 'all':
+            print("dumping pickle in {}".format(pickle_path.absolute().as_posix()))
             dump(df)
-        elif self.record_mode in ['once', 'new_episodes']:
+
+        elif self.record_mode in ['new_episodes', 'once']:
             if not pickle_path.exists():
                 dump(df)
+            else:
+                compare(df)
+
         elif self.record_mode == 'none':
             if not pickle_path.exists():
-                dump(df)
+                raise Exception("{} do not exists.".format(pickle_path))
             else:
                 compare(df)
 
@@ -72,7 +80,7 @@ def pytest_addoption(parser):
         '--vcr-record',
         action='store',
         dest='vcr_record',
-        default=None,
+        default='none',
         choices=['once', 'new_episodes', 'none', 'all'],
         help='Set the recording mode for VCR')
     group.addoption(
