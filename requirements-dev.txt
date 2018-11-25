@@ -1,5 +1,6 @@
 -r requirements.txt
 
+requests
 pytest-cov
 
 # -r docs/requirements.txt
