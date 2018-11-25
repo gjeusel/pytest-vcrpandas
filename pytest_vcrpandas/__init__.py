@@ -60,7 +60,10 @@ class BaseRecorder:
             if not pickle_path.exists():
                 dump(df)
         elif self.record_mode == 'none':
-            compare(df)
+            if not pickle_path.exists():
+                dump(df)
+            else:
+                compare(df)
 
 
 def pytest_addoption(parser):
