@@ -1,29 +1,27 @@
 language: python
+
 python:
   - '3.6'
 
 install:
-    - pip install -U pip
-    - pip install -r requirements-dev.txt
-    - pip install .
-    - pip freeze
-    - pip install -U pytest
+  - pip install -U pip
+  - pip install -r requirements-dev.txt
+  - pip install .
+  - pip freeze
+  - pip install -U pytest
 
 script: pytest tests/test_vcrpandas.py
-#after_success:
-#  - codecov
 
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
+
   user: gjeusel
   password:
-    secure: uHxHUARVBBIcVi7Y9+RRlAYi4Q1aM6dt81wwogKQy2wcPQzeVfS2UVLFunoulE0rNx1UTgGV9Z6zyI2VK8t9xrS0+swltaycdXCoqkyymSmWw/f9Fdm+veM/nsjr0SyItybbCx+CUS3T/fa5DzPmbbDImXwf8ngVBRtSMZROLbUqFleKZn2p4N9047HMpubOhBlPREZU1PJVtbQqgLMGKwbnAL0/pzWjNGevBd2Ow0XpvENrVlDWTb561K8ADE1IQ9zrYMIfvk8c/K1dbvykGwjunzArA93gSYDDebS2CTiAYi5XgbAk9/t9S9NDW1UaLI96dJVhbzbfmt8TJZFqxyxRuHOSV5F4HcWzF9g1fcaqELJ5pv7VtTbVmQGEKdGzChTydp/KW41pbMTn3QvEiH+3Zb/V35LmlLj2SQsPBdhm4osiTZQF+P6ekl2j845Q5Mro7Z5zpC5XrEewNnQc/P3FIGVZHpxk3MzJQkoNNt2ozloNhwKTZK0HBj6WSjWNx2c+LiIjvRfs9nO2LUaEqoHbkvSWuleioom5MtrvMHid8RE1+zTx32AMQmpTLb4l6qCXU467lmrrfH1ui4GY86B7u/bbTdfDtCM47k59Zys3nKmlYQoOtrf8+sWZheQ5wrhNboAn28Dp7QopMVUwXQ+D7CntRjZ0zdOs6DQqi0c=
+    secure: hsjQDmtJ96v7G1/0QVujK6ey/oE4protolhzn2COH9k+L97HZb9eaVQNMH2TF99Cv0kRQ5YFlIr8Htmq+Nd+qxR5DEuJTnepXa8s5ks8/qqlhjHaQBIdBUetglIE43MC9ssTAABy0Gs8F5IwHFnEgrP+Qcv+HA2xaeP3NyQGfXIbNxgoHRty5TXDe8z9FAd8vDHH3je+XnXMxDXRhbTdNwJtsfKvuG9qyc2EpMdirBnlAnrJuOrSt61wA0uk/26hfVySdlYBabqPyeByX5UV4KWFj4JUG7ThjCeAqXQLfP8H3MtP4rB7JczzA//btNULtBDC4ttknBMGqrw7nLR/pW57r5xYZ6hNdHOGzL7OhQPX9TEXmNcbLgKuf2RYZvj2G8sEKjTOZQUI4ggZ2a5ESPVUTbklJR4dDa6tzDQJdNiyHM+CE7S9AEH6xDyy6QDdTy5253RJqKnLK158XttpeAhykLHCWHS6vyuQTjVEZnpn8bjFoBZLxn4yIeKANXI0nHEz12lbB1DcQTRNSiN24rslChQ3lHo/S+iUTRTd5YSOi1v+hJbLOizA5GkgYEaArUA4gt3uFoO1J1E9mCcFU4/jPfcWrmgmyF7u1DYbK0QE32JrKndJQohtcgH6r3/6I44SIAwNoJr9DWGt0VEWCmQR+o8vvSfsOnbHCLzGcGI=
+
   skip_cleanup: true
+
   on:
     tags: true
     branch: master
