@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/gjeusel/pytest-vcrpandas.svg?branch=master
-  :target: https://travis-ci.org/gjeusel/pytest-vcrpandas
+.. image:: https://travis-ci.com/gjeusel/pytest-vcrpandas.svg?branch=master
+  :target: https://travis-ci.com/gjeusel/pytest-vcrpandas
 .. image:: https://readthedocs.org/projects/pytest-vcrpandas/badge/?version=latest
   :target: http://pytest-vcrpandas.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
