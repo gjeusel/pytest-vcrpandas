@@ -28,4 +28,5 @@ CL = JsonPlaceHolderClient()
 
 
 def test_get_todos(vcrpandas):
-    vcrpandas.run(df=CL.get_todos(), bucket_name='testnumberone.yml')
+    with vcrpandas("random_bucket_name") as recorder:
+        recorder(CL.get_todos())

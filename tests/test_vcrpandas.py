@@ -1,6 +1,7 @@
-# import pytest
-# # Check that the plugin has been properly installed before proceeding
-# assert pytest.config.pluginmanager.hasplugin("vcrpandas")
+import pytest
+
+# Check that the plugin has been properly installed before proceeding
+assert pytest.config.pluginmanager.hasplugin("vcrpandas")
 
 
 def test_jsonplaceholder_get_todos(testdir):

@@ -1,9 +1,11 @@
-import pytest
+from pathlib import Path
 
+import pandas as pd
+import pytest
 import vcr
 
 
-class RecorderBase:
+class BaseRecorder:
     """
     Context manager that will either record or replay requests call.
     It also proposes a send_object that will either save a DataFrame
@@ -11,54 +13,54 @@ class RecorderBase:
 
     """
 
-    def __init__(self, bucket_name, mode='none'):
-        self.bucket_name = bucket_name
-        self.mode = mode
+    def __init__(self,
+                 bucket_name,
+                 record_mode='once',
+                 cassette_library_dir='fixtures/cassettes',
+                 **kwargs):
+        self.bucket_name = Path(bucket_name).stem
+        self.record_mode = record_mode
+        self.cassette_library_dir = Path(cassette_library_dir)
+
+        self.vcr = vcr.VCR(
+            # serializer='json',
+            cassette_library_dir=cassette_library_dir,
+            record_mode=record_mode,
+            match_on=['uri', 'method'],
+            **kwargs)
 
     def __enter__(self):
-        self.rec = self.recorder.use_cassette(
-            self.bucket_name,
-            record=self.mode,
+        self.cm = self.vcr.use_cassette(
+            "{}.yaml".format(self.cassette_library_dir / self.bucket_name),
+            record=self.record_mode,
         )
-        self.rec.start()
+        self.cm.__enter__()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.rec.stop()
+        self.cm.__exit__()
 
-    def send_dataframe(self, df):
+    def __call__(self, df):
         if not isinstance(df, pd.DataFrame):
-            raise NotImplementedError('Recorder Only works for pandas.DataFrame.')
+            raise ValueError(
+                'df is not a pandas.DataFrame instance: {}.'.format(df))
 
-        if df.empty:
-            raise ValueError('DataFrame is empty')
-
-        pickle_path = SAMPLES_DIR / "{}.pickle".format(self.bucket_name)
-        csv_path = SAMPLES_DIR / "{}.csv".format(self.bucket_name)
+        pickle_path = self.cassette_library_dir / "{}.pickle".format(self.bucket_name)
 
         def dump(df):
             df.to_pickle(pickle_path)
-            df.to_csv(csv_path)
 
         def compare(df):
             df_original = pd.read_pickle(pickle_path)
-            assert_frame_equal(df, df_original)
+            pd.testing.assert_frame_equal(df, df_original)
 
-        if self.mode == 'all':
+        if self.record_mode == 'all':
             dump(df)
-        elif self.mode == 'once':
+        elif self.record_mode in ['once', 'new_episodes']:
             if not pickle_path.exists():
                 dump(df)
-        elif self.mode == 'none':
+        elif self.record_mode == 'none':
             compare(df)
-
-
-
-def recorder_pandas(df, bucket_name, dir_cassette, mode):
-    cassette_path = dir_cassette / bucket_name
-    pickle_df_path = cassette_path.parent / "{}.{}".format(cassette_path.stem, "pkl")
-    with vcr.use_cassette(cassette_path.as_posix()):
-        df_expected = pd.read_pickle(pickle_df_path)
 
 
 def pytest_addoption(parser):
@@ -69,17 +71,26 @@ def pytest_addoption(parser):
         dest='vcr_record',
         default=None,
         choices=['once', 'new_episodes', 'none', 'all'],
-        help='Set the recording mode for VCR'
-    )
+        help='Set the recording mode for VCR')
     group.addoption(
         '--disable-vcr',
         action='store_true',
         dest='disable_vcr',
-        help='Run tests without playing back VCR cassettes'
-    )
+        help='Run tests without playing back VCR cassettes')
 
 
-@pytest.fixture
-def vcrpandas():
-    obj = Object()
-    return obj
+@pytest.fixture(scope='module')
+def vcrpandas(request):
+    record_mode = request.config.getoption('--vcr-record')
+
+    kwargs = {}
+    if request.config.getoption('--disable-vcr'):
+        # Set mode to record but discard all responses to disable both recording and playback
+        record_mode = 'new_episodes'
+        kwargs['before_record_response'] = lambda *args, **kwargs: None
+
+    class Recorder(BaseRecorder):
+        def __init__(self, bucket_name):
+            super().__init__(bucket_name, record_mode, **kwargs)
+
+    return Recorder
