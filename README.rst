@@ -56,3 +56,34 @@ Installation
 
     pip install pytest-vcrpandas
 
+
+Advanced Usage
+--------------
+
+To configure VCR, here is how to procee:
+
+
+.. code:: python
+
+  @pytest.fixture
+  def my_vcrpandas(vcrpandas):
+      custom_vcr_config = dict(
+          serializer='json',
+          cassette_library_dir='fixtures/myclient/cassettes',
+          match_on=['uri', 'method'],
+          filter_headers=['authorization'],  # filter information from HTTP Headers
+          filter_query_parameters=['api_key'],  # filter information from HTTP query string
+          filter_post_data_parameters=['client_secret'],  # filter information from HTTP post data
+      )
+      vcrpandas.config.update(custom_vcr_config)
+      return vcrpandas
+
+
+  def test_mysupertest(my_vcrpandas):
+      with my_vcrpandas("random_bucket_name") as recorder:
+          recorder(CL.get_stuff())
+
+
+Refere to `VCR configuration <https://vcrpy.readthedocs.io/en/latest/configuration.html`_ and
+`VCR Advanced Features <https://vcrpy.readthedocs.io/en/latest/advanced.html>`_ to get the
+full list of options.

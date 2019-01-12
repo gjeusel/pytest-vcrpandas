@@ -6,7 +6,7 @@ assert pytest.config.pluginmanager.hasplugin("vcrpandas")
 
 
 def test_jsonplaceholder_get_todos(testdir):
-    testdir.copy_example("test_jsonplaceholder.py")
+    testdir.copy_example("client_tester/test_jsonplaceholder.py")
     result = testdir.runpytest("-k", "test_get_todos", "--vcr-record", "new_episodes")
 
     for ext in [".yaml", ".pickle"]:

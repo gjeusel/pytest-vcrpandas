@@ -1,0 +1,27 @@
+CHANGES
+=======
+
+0.0.1
+-----
+
+* Fix classifiers
+* Trying to get correct classifiers
+* Update travis pypi secure password
+* Update readme for new travis url
+* Add request for test
+* Get latest pytest version
+* CI, put aside coverage at the moment
+* Still trying to get the CI works
+* Update pytest version for tests travis
+* Update travis
+* Add back requirements-dev.txt
+* Rename, prepare test & fix pickle path
+* Update gitignore
+* Add another classifier
+* Update readme
+* Update requirements
+* Add fixture and complete BaseRecorder
+* Still thinking at the interface
+* Some more cleaning
+* Some cleaning up
+* First commit thx to cookiecutter

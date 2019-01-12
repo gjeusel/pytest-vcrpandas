@@ -13,25 +13,22 @@ class BaseRecorder:
 
     """
 
-    def __init__(self,
-                 bucket_name,
-                 record_mode='once',
-                 cassette_library_dir='fixtures/cassettes',
-                 **kwargs):
+    config = {
+        'cassette_library_dir': 'fixtures/cassettes',
+        # 'serializer': 'json',
+        # 'match_on': ['uri', 'method'],
+    }
+
+    def __init__(self, bucket_name, record_mode='once', **kwargs):
         self.bucket_name = Path(bucket_name).stem
         self.record_mode = record_mode
-        self.cassette_library_dir = Path(cassette_library_dir)
-
-        self.vcr = vcr.VCR(
-            # serializer='json',
-            cassette_library_dir=cassette_library_dir,
-            record_mode=record_mode,
-            match_on=['uri', 'method'],
-            **kwargs)
+        self.config.update(kwargs)
+        self.vcr = vcr.VCR(**self.config)
 
     def __enter__(self):
+        cassette_dir = Path(self.config['cassette_library_dir'])
         self.cm = self.vcr.use_cassette(
-            "{}.yaml".format(self.cassette_library_dir / self.bucket_name),
+            "{}.yaml".format(cassette_dir / self.bucket_name),
             record=self.record_mode,
         )
         self.cm.__enter__()
@@ -45,8 +42,8 @@ class BaseRecorder:
             raise ValueError(
                 'df is not a pandas.DataFrame instance: {}.'.format(df))
 
-        pickle_path = self.cassette_library_dir / "{}.pickle".format(
-            self.bucket_name)
+        cassette_dir = Path(self.config['cassette_library_dir'])
+        pickle_path = cassette_dir / "{}.pickle".format(self.bucket_name)
 
         def dump(df):
             if not pickle_path.parent.exists():
@@ -58,7 +55,8 @@ class BaseRecorder:
             pd.testing.assert_frame_equal(df, df_original)
 
         if self.record_mode == 'all':
-            print("dumping pickle in {}".format(pickle_path.absolute().as_posix()))
+            print("dumping pickle in {}".format(
+                pickle_path.absolute().as_posix()))
             dump(df)
 
         elif self.record_mode in ['new_episodes', 'once']:
