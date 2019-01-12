@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 import requests
 
 
@@ -29,4 +30,17 @@ CL = JsonPlaceHolderClient()
 
 def test_get_todos(vcrpandas):
     with vcrpandas("random_bucket_name") as recorder:
+        recorder(CL.get_todos())
+
+
+@pytest.fixture
+def vcrpandas_otherpath(vcrpandas):
+    vcrpandas.config.update({
+        'cassette_library_dir': 'fixtures/myclient/cassettes',
+    })
+    return vcrpandas
+
+
+def test_otherpath_get_todos(vcrpandas_otherpath):
+    with vcrpandas_otherpath("random_bucket_name") as recorder:
         recorder(CL.get_todos())
